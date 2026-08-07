@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Jewish Heritage Project</title>
+
+	<link rel="stylesheet" href="style.css"/>
+	<link rel="icon" type="image/png" href="icons/favicon.png"/>
+</head>
+
+<body>
+
+<header id="header">
+	✡ Jewish Heritage Project ✡
+	<p>פרויקט יהודי</p>
+	<img class="header-flag" src="icons/OIP-2306629180.jpg" alt="Flag of Israel"/>
+</header>
+<div class="papercut-edge-bottom"></div>
+
+<main>
+	<div class="Images">
+		<img id="Jewishlogo"
+		     src="icons/OIP-1775055828.png"
+		     alt="Jewish Star of David Logo"/>
+	</div>
+
+	<section class="content">
+		<h1>עם ישראל חי</h1>
+		<p>
+			Celebrating Jewish history, culture, traditions, and identity.
+		</p>
+
+		<div class="symbols">
+			🕎 ✡️ 📜 🕍
+		</div>
+
+		<a class="home-cta" href="donation.html">Play the Coin Clicker →</a>
+	</section>
+</main>
+
+<div class="papercut-edge-top"></div>
+<footer>
+	Shalom שלום
+</footer>
+
+<button id="donateBtn">Donate</button>
+
+<div id="donationPopup" class="popup">
+	<div class="popup-box">
+		<h2>✡ Support Jewish Heritage</h2>
+		<p>Your donation helps preserve culture, history, and education.</p>
+
+		<button onclick="donate()">Donate ❤️</button>
+		<button onclick="closePopup()">Maybe Later</button>
+	</div>
+</div>
+
+<script>
+	const popup = document.getElementById("donationPopup");
+
+	window.onload = () => {
+		setTimeout(() => {
+			popup.style.display = "flex";
+		}, 1000);
+	};
+
+	function donate() {
+		window.location.href = "donation.html";
+	}
+
+	function closePopup() {
+		popup.style.display = "none";
+	}
+</script>
+
+</body>
+</html>

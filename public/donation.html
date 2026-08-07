@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation Clicker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+<header id="header">
+    ✡ Jewish Heritage Clicker ✡
+    <p>פרויקט תרומה</p>
+</header>
+<div class="papercut-edge-bottom"></div>
+
+<div class="donation-box">
+
+    <h1>🪙 Jewish Coin Clicker</h1>
+    <p class="tagline">Collect coins to grow the virtual heritage project!</p>
+
+    <div class="coin-panel">
+        <h2 id="coins">Coins: 0</h2>
+        <div id="coinsPerSecond">+0 coins / sec</div>
+
+        <button id="clickButton">
+            Donate a<br/>Jewish Coin ✡
+        </button>
+
+        <p id="message"></p>
+    </div>
+
+    <div class="shop">
+        <h2>Community Shop</h2>
+
+        <div class="shop-section-label">Per-click upgrades</div>
+        <div id="clickUpgrades"></div>
+
+        <div class="shop-section-label">Passive givers</div>
+        <div id="autoUpgrades"></div>
+    </div>
+
+    <div class="leaderboard">
+        <h2>Top Supporters</h2>
+        <div class="name-row">
+            <input id="playerName" type="text" placeholder="Your name" maxlength="24" />
+            <button id="saveScoreBtn">Save my score</button>
+        </div>
+        <p id="leaderboardStatus"></p>
+        <ol id="leaderboardList"></ol>
+    </div>
+
+    <a class="back-link" href="index.html">← Back Home</a>
+
+</div>
+
+<script>
+    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let coins = 0;
+    let coinsPerClick = 1;
+    let coinsPerSecond = 0;
+
+    const clickUpgrades = [
+        { id: "heart", name: "Generous Heart", desc: "+1 coin per click", icon: "🤲", baseCost: 25, add: 1, owned: 0 },
+        { id: "match", name: "Matching Gift", desc: "+5 coins per click", icon: "🤝", baseCost: 300, add: 5, owned: 0 },
+        { id: "drive", name: "Pledge Drive", desc: "+25 coins per click", icon: "📣", baseCost: 3000, add: 25, owned: 0 },
+    ];
+
+    const autoUpgrades = [
+        { id: "box", name: "Tzedakah Box", desc: "+1 coin / sec", icon: "📦", baseCost: 15, add: 1, owned: 0 },
+        { id: "vol", name: "Community Volunteer", desc: "+5 coins / sec", icon: "🙋", baseCost: 100, add: 5, owned: 0 },
+        { id: "fund", name: "Synagogue Fund", desc: "+20 coins / sec", icon: "🕍", baseCost: 1200, add: 20, owned: 0 },
+        { id: "center", name: "Community Center", desc: "+100 coins / sec", icon: "🏛️", baseCost: 13000, add: 100, owned: 0 },
+        { id: "legacy", name: "Legacy Endowment", desc: "+500 coins / sec", icon: "📜", baseCost: 140000, add: 500, owned: 0 },
+    ];
+
+    const milestones = [100, 500, 1000, 5000, 10000, 50000, 100000, 500000];
+    const milestoneMessages = {
+        100: "🎉 100 coins donated!",
+        500: "🕎 500 coins — the community feels it!",
+        1000: "✡ Legendary supporter! 1,000 coins!",
+        5000: "🌟 5,000 coins — word is spreading!",
+        10000: "📜 10,000 coins — a true patron!",
+        50000: "🏛️ 50,000 coins — a whole center funded!",
+        100000: "👑 100,000 coins — a heritage keeper!",
+        500000: "✡️ 500,000 coins — your name will be remembered!",
+    };
+    const reachedMilestones = new Set();
+
+    const button = document.getElementById("clickButton");
+    const counter = document.getElementById("coins");
+    const perSecondEl = document.getElementById("coinsPerSecond");
+    const message = document.getElementById("message");
+    const clickUpgradesEl = document.getElementById("clickUpgrades");
+    const autoUpgradesEl = document.getElementById("autoUpgrades");
+
+    function costFor(upgrade) {
+        return Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.owned));
+    }
+
+    function fmt(n) {
+        return Math.floor(n).toLocaleString();
+    }
+
+    function renderShop() {
+        clickUpgradesEl.innerHTML = "";
+        clickUpgrades.forEach(u => clickUpgradesEl.appendChild(buildCard(u, buyClickUpgrade)));
+
+        autoUpgradesEl.innerHTML = "";
+        autoUpgrades.forEach(u => autoUpgradesEl.appendChild(buildCard(u, buyAutoUpgrade)));
+    }
+
+    function buildCard(upgrade, onBuy) {
+        const cost = costFor(upgrade);
+        const card = document.createElement("button");
+        card.className = "upgrade-card";
+        card.disabled = coins < cost;
+        card.innerHTML = `
+            <div class="upgrade-icon">${upgrade.icon}</div>
+            <div class="upgrade-info">
+                <div class="upgrade-name">${upgrade.name}</div>
+                <div class="upgrade-desc">${upgrade.desc}</div>
+            </div>
+            <div class="upgrade-meta">
+                <div class="upgrade-cost">${fmt(cost)} 🪙</div>
+                <div class="upgrade-owned">owned: ${upgrade.owned}</div>
+            </div>
+        `;
+        card.onclick = () => onBuy(upgrade);
+        return card;
+    }
+
+    function buyClickUpgrade(upgrade) {
+        const cost = costFor(upgrade);
+        if (coins < cost) return;
+        coins -= cost;
+        upgrade.owned++;
+        coinsPerClick += upgrade.add;
+        refresh();
+    }
+
+    function buyAutoUpgrade(upgrade) {
+        const cost = costFor(upgrade);
+        if (coins < cost) return;
+        coins -= cost;
+        upgrade.owned++;
+        coinsPerSecond += upgrade.add;
+        refresh();
+    }
+
+    function checkMilestones() {
+        for (const m of milestones) {
+            if (coins >= m && !reachedMilestones.has(m)) {
+                reachedMilestones.add(m);
+                message.textContent = milestoneMessages[m];
+            }
+        }
+    }
+
+    function refresh() {
+        counter.textContent = "Coins: " + fmt(coins);
+        perSecondEl.textContent = `+${fmt(coinsPerSecond)} coins / sec  ·  +${fmt(coinsPerClick)} per click`;
+        renderShop();
+    }
+
+    button.onclick = function () {
+        coins += coinsPerClick;
+        checkMilestones();
+        refresh();
+    };
+
+    setInterval(() => {
+        if (coinsPerSecond > 0) {
+            coins += coinsPerSecond / 10;
+            checkMilestones();
+            refresh();
+        }
+    }, 100);
+
+    refresh();
+
+    const nameInput = document.getElementById("playerName");
+    const saveScoreBtn = document.getElementById("saveScoreBtn");
+    const leaderboardStatus = document.getElementById("leaderboardStatus");
+    const leaderboardList = document.getElementById("leaderboardList");
+
+    async function loadLeaderboard() {
+        const { data, error } = await supabaseClient
+            .from("leaderboard")
+            .select("name, coins")
+            .order("coins", { ascending: false })
+            .limit(10);
+
+        if (error) {
+            leaderboardStatus.textContent = "Couldn't load the leaderboard.";
+            return;
+        }
+
+        leaderboardList.innerHTML = "";
+        data.forEach(row => {
+            const li = document.createElement("li");
+            li.textContent = `${row.name} — ${fmt(row.coins)} coins`;
+            leaderboardList.appendChild(li);
+        });
+    }
+
+    async function saveScore() {
+        const name = nameInput.value.trim();
+        if (!name) {
+            leaderboardStatus.textContent = "Enter a name first.";
+            return;
+        }
+
+        const { data: existing } = await supabaseClient
+            .from("leaderboard")
+            .select("coins")
+            .eq("name", name)
+            .maybeSingle();
+
+        const bestScore = existing ? Math.max(existing.coins, coins) : coins;
+
+        const { error } = await supabaseClient
+            .from("leaderboard")
+            .upsert({ name, coins: Math.floor(bestScore) }, { onConflict: "name" });
+
+        if (error) {
+            leaderboardStatus.textContent = "Couldn't save your score.";
+            return;
+        }
+
+        leaderboardStatus.textContent = "Saved!";
+        loadLeaderboard();
+    }
+
+    saveScoreBtn.onclick = saveScore;
+    loadLeaderboard();
+</script>
+
+</body>
+</html>
