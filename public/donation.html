@@ -79,8 +79,8 @@
 <button id="ownerDashboardBtn" style="display:none;">Dashboard</button>
 
 <script>
-    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const SUPABASE_URL = "https://nlewibtibgbjwqzytphy.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_Bqo0Gwutf6yKo8ToA53gwg_eiZHMXYe";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let coins = 0;
@@ -210,7 +210,6 @@
     const playerKeyDisplay = document.getElementById("playerKeyDisplay");
     const restoreKeyInput = document.getElementById("restoreKeyInput");
     const restoreKeyBtn = document.getElementById("restoreKeyBtn");
-    const OWNER_KEY = "47658e28-2b8e-436e-9f72-b2809b1c7b36";
     const ownerDashboardBtn = document.getElementById("ownerDashboardBtn");
 
     function renderPlayerKey() {
