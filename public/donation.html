@@ -1,399 +1,208 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donation Clicker</title>
+
+    <title>Jewish Coin Clicker</title>
+
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="icon" type="image/png" href="icons/favicon.png">
 </head>
 
 <body>
 
 <header id="header">
-    ✡ Jewish Heritage Clicker ✡
-    <p>פרויקט תרומה</p>
+    🪙 Jewish Coin Clicker
+    <p>עם ישראל חי</p>
 </header>
-<div class="papercut-edge-bottom"></div>
 
-<div class="donation-box">
 
-    <h1>🪙 Jewish Coin Clicker</h1>
-    <p class="tagline">Collect coins to grow the virtual heritage project!</p>
+<section class="donation-box">
+
+    <h1>Collect Virtual Jewish Coins</h1>
+
+    <p class="tagline">
+        Support the virtual heritage project by collecting coins.
+    </p>
+
 
     <div class="coin-panel">
-        <h2 id="coins">Coins: 0</h2>
-        <div id="coinsPerSecond">+0 coins / sec</div>
+
+        <h2 id="coins">
+            Coins: 0
+        </h2>
+
+        <div id="coinsPerSecond">
+            +0 coins / sec
+        </div>
+
 
         <button id="clickButton">
-            Donate a<br/>Jewish Coin ✡
+            Donate a<br>
+            Jewish Coin ✡
         </button>
 
+
         <p id="message"></p>
+
     </div>
+
+
 
     <div class="shop">
-        <h2>Community Shop</h2>
 
-        <div class="shop-section-label">Per-click upgrades</div>
+        <h2>
+            Community Shop
+        </h2>
+
+
+        <div class="shop-section-label">
+            Per-click upgrades
+        </div>
+
         <div id="clickUpgrades"></div>
 
-        <div class="shop-section-label">Passive givers</div>
+
+        <div class="shop-section-label">
+            Passive givers
+        </div>
+
         <div id="autoUpgrades"></div>
+
     </div>
 
-    <div id="dashboard" class="dashboard" style="display:none;">
-        <h2>Owner Dashboard</h2>
+
+
+    <!-- OWNER AREA -->
+    <!-- Only displayed after Supabase permission check -->
+
+    <button id="ownerDashboardBtn" style="display:none;">
+        Owner Dashboard
+    </button>
+
+
+    <div id="dashboard"
+         class="dashboard"
+         style="display:none;">
+
+
+        <h2>
+            Owner Dashboard
+        </h2>
+
+
         <div id="dashboardStats"></div>
-        <button id="resetLeaderboardBtn" class="reset-btn">Reset entire leaderboard</button>
+
+
+        <button id="resetLeaderboardBtn"
+                class="reset-btn">
+            Reset leaderboard
+        </button>
+
+
         <table id="dashboardTable">
+
             <thead>
-            <tr><th>Name</th><th>Key</th><th>Coins</th><th>Role</th><th>Actions</th></tr>
+
+            <tr>
+                <th>Name</th>
+                <th>Coins</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+
             </thead>
+
+
             <tbody id="dashboardBody"></tbody>
+
         </table>
+
     </div>
+
+
+
+    <!-- PLAYER AREA -->
 
     <div class="leaderboard">
-        <h2>Top Supporters</h2>
+
+        <h2>
+            Top Supporters
+        </h2>
+
+
         <div class="player-key-box">
-            <p>Your player key: <span id="playerKeyDisplay"></span></p>
-            <p class="player-key-hint">Save this. It proves scores under your name are yours. Lost it? Paste it below to restore it.</p>
+
+            <p>
+                Your player ID:
+                <span id="playerKeyDisplay"></span>
+            </p>
+
+
+            <p class="player-key-hint">
+                Keep this private. It identifies your account.
+            </p>
+
+
             <div class="name-row">
-                <input id="restoreKeyInput" type="text" placeholder="Paste an existing player key" />
-                <button id="restoreKeyBtn">Use this key</button>
+
+                <input
+                        id="restoreKeyInput"
+                        type="text"
+                        placeholder="Restore player ID">
+
+                <button id="restoreKeyBtn">
+                    Restore
+                </button>
+
             </div>
+
         </div>
+
+
+
         <div class="name-row">
-            <input id="playerName" type="text" placeholder="Your name" maxlength="24" />
-            <button id="saveScoreBtn">Save my score</button>
+
+            <input
+                    id="playerName"
+                    maxlength="24"
+                    placeholder="Your name">
+
+
+            <button id="saveScoreBtn">
+                Save score
+            </button>
+
         </div>
+
+
         <p id="leaderboardStatus"></p>
+
+
         <ol id="leaderboardList"></ol>
+
+
     </div>
 
-    <a class="back-link" href="index.html">← Back Home</a>
 
-</div>
+</section>
 
-<button id="ownerDashboardBtn" style="display:none;">Dashboard</button>
 
-<script>
-    const SUPABASE_URL = "https://nlewibtibgbjwqzytphy.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_Bqo0Gwutf6yKo8ToA53gwg_eiZHMXYe";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let coins = 0;
-    let coinsPerClick = 1;
-    let coinsPerSecond = 0;
+<footer>
+    עם ישראל חי ✡
+</footer>
 
-    const clickUpgrades = [
-        { id: "heart", name: "Generous Heart", desc: "+1 coin per click", icon: "🤲", baseCost: 25, add: 1, owned: 0 },
-        { id: "match", name: "Matching Gift", desc: "+5 coins per click", icon: "🤝", baseCost: 300, add: 5, owned: 0 },
-        { id: "drive", name: "Pledge Drive", desc: "+25 coins per click", icon: "📣", baseCost: 3000, add: 25, owned: 0 },
-    ];
 
-    const autoUpgrades = [
-        { id: "box", name: "Tzedakah Box", desc: "+1 coin / sec", icon: "📦", baseCost: 15, add: 1, owned: 0 },
-        { id: "vol", name: "Community Volunteer", desc: "+5 coins / sec", icon: "🙋", baseCost: 100, add: 5, owned: 0 },
-        { id: "fund", name: "Synagogue Fund", desc: "+20 coins / sec", icon: "🕍", baseCost: 1200, add: 20, owned: 0 },
-        { id: "center", name: "Community Center", desc: "+100 coins / sec", icon: "🏛️", baseCost: 13000, add: 100, owned: 0 },
-        { id: "legacy", name: "Legacy Endowment", desc: "+500 coins / sec", icon: "📜", baseCost: 140000, add: 500, owned: 0 },
-    ];
 
-    const milestones = [100, 500, 1000, 5000, 10000, 50000, 100000, 500000];
-    const milestoneMessages = {
-        100: "🎉 100 coins donated!",
-        500: "🕎 500 coins — the community feels it!",
-        1000: "✡ Legendary supporter! 1,000 coins!",
-        5000: "🌟 5,000 coins — word is spreading!",
-        10000: "📜 10,000 coins — a true patron!",
-        50000: "🏛️ 50,000 coins — a whole center funded!",
-        100000: "👑 100,000 coins — a heritage keeper!",
-        500000: "✡️ 500,000 coins — your name will be remembered!",
-    };
-    const reachedMilestones = new Set();
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    const button = document.getElementById("clickButton");
-    const counter = document.getElementById("coins");
-    const perSecondEl = document.getElementById("coinsPerSecond");
-    const message = document.getElementById("message");
-    const clickUpgradesEl = document.getElementById("clickUpgrades");
-    const autoUpgradesEl = document.getElementById("autoUpgrades");
 
-    function costFor(upgrade) {
-        return Math.ceil(upgrade.baseCost * Math.pow(1.15, upgrade.owned));
-    }
+<!-- Your game code -->
+<script src="donation.js"></script>
 
-    function fmt(n) {
-        return Math.floor(n).toLocaleString();
-    }
-
-    function renderShop() {
-        clickUpgradesEl.innerHTML = "";
-        clickUpgrades.forEach(u => clickUpgradesEl.appendChild(buildCard(u, buyClickUpgrade)));
-
-        autoUpgradesEl.innerHTML = "";
-        autoUpgrades.forEach(u => autoUpgradesEl.appendChild(buildCard(u, buyAutoUpgrade)));
-    }
-
-    function buildCard(upgrade, onBuy) {
-        const cost = costFor(upgrade);
-        const card = document.createElement("button");
-        card.className = "upgrade-card";
-        card.disabled = coins < cost;
-        card.innerHTML = `
-            <div class="upgrade-icon">${upgrade.icon}</div>
-            <div class="upgrade-info">
-                <div class="upgrade-name">${upgrade.name}</div>
-                <div class="upgrade-desc">${upgrade.desc}</div>
-            </div>
-            <div class="upgrade-meta">
-                <div class="upgrade-cost">${fmt(cost)} 🪙</div>
-                <div class="upgrade-owned">owned: ${upgrade.owned}</div>
-            </div>
-        `;
-        card.onclick = () => onBuy(upgrade);
-        return card;
-    }
-
-    function buyClickUpgrade(upgrade) {
-        const cost = costFor(upgrade);
-        if (coins < cost) return;
-        coins -= cost;
-        upgrade.owned++;
-        coinsPerClick += upgrade.add;
-        refresh();
-    }
-
-    function buyAutoUpgrade(upgrade) {
-        const cost = costFor(upgrade);
-        if (coins < cost) return;
-        coins -= cost;
-        upgrade.owned++;
-        coinsPerSecond += upgrade.add;
-        refresh();
-    }
-
-    function checkMilestones() {
-        for (const m of milestones) {
-            if (coins >= m && !reachedMilestones.has(m)) {
-                reachedMilestones.add(m);
-                message.textContent = milestoneMessages[m];
-            }
-        }
-    }
-
-    function refresh() {
-        counter.textContent = "Coins: " + fmt(coins);
-        perSecondEl.textContent = `+${fmt(coinsPerSecond)} coins / sec  ·  +${fmt(coinsPerClick)} per click`;
-        renderShop();
-    }
-
-    button.onclick = function () {
-        coins += coinsPerClick;
-        checkMilestones();
-        refresh();
-    };
-
-    setInterval(() => {
-        if (coinsPerSecond > 0) {
-            coins += coinsPerSecond / 10;
-            checkMilestones();
-            refresh();
-        }
-    }, 100);
-
-    refresh();
-
-    let playerKey = crypto.randomUUID();
-    const playerKeyDisplay = document.getElementById("playerKeyDisplay");
-    const restoreKeyInput = document.getElementById("restoreKeyInput");
-    const restoreKeyBtn = document.getElementById("restoreKeyBtn");
-    const ownerDashboardBtn = document.getElementById("ownerDashboardBtn");
-
-    function renderPlayerKey() {
-        playerKeyDisplay.textContent = playerKey;
-        ownerDashboardBtn.style.display = (playerKey === OWNER_KEY) ? "block" : "none";
-    }
-    renderPlayerKey();
-
-    restoreKeyBtn.onclick = () => {
-        const pasted = restoreKeyInput.value.trim();
-        if (!pasted) return;
-        playerKey = pasted;
-        renderPlayerKey();
-        leaderboardStatus.textContent = "Player key restored.";
-    };
-
-    const nameInput = document.getElementById("playerName");
-    const saveScoreBtn = document.getElementById("saveScoreBtn");
-    const leaderboardStatus = document.getElementById("leaderboardStatus");
-    const leaderboardList = document.getElementById("leaderboardList");
-
-    async function loadLeaderboard() {
-        const { data, error } = await supabaseClient
-            .from("leaderboard")
-            .select("name, coins")
-            .order("coins", { ascending: false })
-            .limit(10);
-
-        if (error) {
-            leaderboardStatus.textContent = "Couldn't load the leaderboard.";
-            return;
-        }
-
-        leaderboardList.innerHTML = "";
-        data.forEach(row => {
-            const li = document.createElement("li");
-            li.textContent = `${row.name} — ${fmt(row.coins)} coins`;
-            leaderboardList.appendChild(li);
-        });
-    }
-
-    async function saveScore() {
-        const name = nameInput.value.trim();
-        if (!name) {
-            leaderboardStatus.textContent = "Enter a name first.";
-            return;
-        }
-
-        const { data: existing } = await supabaseClient
-            .from("leaderboard")
-            .select("coins, owner_key")
-            .eq("name", name)
-            .maybeSingle();
-
-        if (existing && existing.owner_key && existing.owner_key !== playerKey) {
-            leaderboardStatus.textContent = "That name is already claimed by a different player key.";
-            return;
-        }
-
-        const bestScore = existing ? Math.max(existing.coins, coins) : coins;
-
-        const { error } = await supabaseClient
-            .from("leaderboard")
-            .upsert({ name, coins: Math.floor(bestScore), owner_key: playerKey }, { onConflict: "name" });
-
-        if (error) {
-            leaderboardStatus.textContent = "Couldn't save your score.";
-            return;
-        }
-
-        leaderboardStatus.textContent = "Saved!";
-        loadLeaderboard();
-    }
-
-    saveScoreBtn.onclick = saveScore;
-    loadLeaderboard();
-
-    const ACCESS_KEY = "wy0oA82FL15z-suZJ5wzvelZ";
-
-    const dashboard = document.getElementById("dashboard");
-    const dashboardStats = document.getElementById("dashboardStats");
-    const dashboardBody = document.getElementById("dashboardBody");
-
-    const dashboard = document.getElementById("dashboard");
-    const dashboardStats = document.getElementById("dashboardStats");
-    const dashboardBody = document.getElementById("dashboardBody");
-    const resetLeaderboardBtn = document.getElementById("resetLeaderboardBtn");
-
-    ownerDashboardBtn.onclick = () => {
-        const isOpen = dashboard.style.display === "block";
-        dashboard.style.display = isOpen ? "none" : "block";
-        if (!isOpen) loadDashboard();
-    };
-
-    async function loadDashboard() {
-        const { data, error } = await supabaseClient
-            .from("leaderboard")
-            .select("id, name, coins, owner_key, role")
-            .order("coins", { ascending: false });
-
-        if (error) {
-            dashboardStats.textContent = "Couldn't load dashboard data.";
-            return;
-        }
-
-        const totalCoins = data.reduce((sum, row) => sum + Number(row.coins), 0);
-        dashboardStats.innerHTML = `<p>${data.length} supporters · ${fmt(totalCoins)} total coins</p>`;
-
-        dashboardBody.innerHTML = "";
-        data.forEach(row => {
-            const tr = document.createElement("tr");
-            const shortKey = row.owner_key ? row.owner_key.slice(0, 8) + "…" : "—";
-            tr.innerHTML = `
-                <td>${row.name}</td>
-                <td title="${row.owner_key || ""}">${shortKey}</td>
-                <td>${fmt(row.coins)}</td>
-                <td>
-                    <select class="role-select" data-id="${row.id}">
-                        <option value="user" ${row.role === "user" ? "selected" : ""}>user</option>
-                        <option value="mod" ${row.role === "mod" ? "selected" : ""}>mod</option>
-                        <option value="admin" ${row.role === "admin" ? "selected" : ""}>admin</option>
-                    </select>
-                </td>
-                <td class="dashboard-actions">
-                    <input type="number" class="coin-add-input" data-id="${row.id}" placeholder="amount" />
-                    <button class="add-coins-btn" data-id="${row.id}">Add</button>
-                    <button class="zero-coins-btn" data-id="${row.id}">Remove all</button>
-                    <button class="delete-row-btn" data-id="${row.id}">Delete</button>
-                </td>
-            `;
-            dashboardBody.appendChild(tr);
-        });
-
-        dashboardBody.querySelectorAll(".role-select").forEach(sel => {
-            sel.onchange = async () => {
-                await supabaseClient.from("leaderboard").update({ role: sel.value }).eq("id", sel.dataset.id);
-            };
-        });
-
-        dashboardBody.querySelectorAll(".add-coins-btn").forEach(btn => {
-            btn.onclick = async () => {
-                const input = dashboardBody.querySelector(`.coin-add-input[data-id="${btn.dataset.id}"]`);
-                const amount = Number(input.value);
-                if (!amount) return;
-                const { data: row } = await supabaseClient
-                    .from("leaderboard")
-                    .select("coins")
-                    .eq("id", btn.dataset.id)
-                    .maybeSingle();
-                if (!row) return;
-                await supabaseClient
-                    .from("leaderboard")
-                    .update({ coins: Number(row.coins) + amount })
-                    .eq("id", btn.dataset.id);
-                loadDashboard();
-                loadLeaderboard();
-            };
-        });
-
-        dashboardBody.querySelectorAll(".zero-coins-btn").forEach(btn => {
-            btn.onclick = async () => {
-                await supabaseClient.from("leaderboard").update({ coins: 0 }).eq("id", btn.dataset.id);
-                loadDashboard();
-                loadLeaderboard();
-            };
-        });
-
-        dashboardBody.querySelectorAll(".delete-row-btn").forEach(btn => {
-            btn.onclick = async () => {
-                await supabaseClient.from("leaderboard").delete().eq("id", btn.dataset.id);
-                loadDashboard();
-                loadLeaderboard();
-            };
-        });
-    }
-
-    resetLeaderboardBtn.onclick = async () => {
-        const confirmed = confirm("This deletes every entry on the leaderboard for everyone. Are you sure?");
-        if (!confirmed) return;
-        await supabaseClient.from("leaderboard").delete().not("id", "is", null);
-        loadDashboard();
-        loadLeaderboard();
-    };
-</script>
 
 </body>
 </html>
