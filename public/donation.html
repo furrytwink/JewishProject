@@ -61,6 +61,14 @@
 
     <div class="leaderboard">
         <h2>Top Supporters</h2>
+        <div class="player-key-box">
+            <p>Your player key: <span id="playerKeyDisplay"></span></p>
+            <p class="player-key-hint">Save this. It proves scores under your name are yours. Lost it? Paste it below to restore it.</p>
+            <div class="name-row">
+                <input id="restoreKeyInput" type="text" placeholder="Paste an existing player key" />
+                <button id="restoreKeyBtn">Use this key</button>
+            </div>
+        </div>
         <div class="name-row">
             <input id="playerName" type="text" placeholder="Your name" maxlength="24" />
             <button id="saveScoreBtn">Save my score</button>
@@ -74,8 +82,8 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "https://nlewibtibgbjwqzytphy.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_Bqo0Gwutf6yKo8ToA53gwg_eiZHMXYe";
+    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let coins = 0;
@@ -201,6 +209,24 @@
 
     refresh();
 
+    let playerKey = crypto.randomUUID();
+    const playerKeyDisplay = document.getElementById("playerKeyDisplay");
+    const restoreKeyInput = document.getElementById("restoreKeyInput");
+    const restoreKeyBtn = document.getElementById("restoreKeyBtn");
+
+    function renderPlayerKey() {
+        playerKeyDisplay.textContent = playerKey;
+    }
+    renderPlayerKey();
+
+    restoreKeyBtn.onclick = () => {
+        const pasted = restoreKeyInput.value.trim();
+        if (!pasted) return;
+        playerKey = pasted;
+        renderPlayerKey();
+        leaderboardStatus.textContent = "Player key restored.";
+    };
+
     const nameInput = document.getElementById("playerName");
     const saveScoreBtn = document.getElementById("saveScoreBtn");
     const leaderboardStatus = document.getElementById("leaderboardStatus");
@@ -235,15 +261,20 @@
 
         const { data: existing } = await supabaseClient
             .from("leaderboard")
-            .select("coins")
+            .select("coins, owner_key")
             .eq("name", name)
             .maybeSingle();
+
+        if (existing && existing.owner_key && existing.owner_key !== playerKey) {
+            leaderboardStatus.textContent = "That name is already claimed by a different player key.";
+            return;
+        }
 
         const bestScore = existing ? Math.max(existing.coins, coins) : coins;
 
         const { error } = await supabaseClient
             .from("leaderboard")
-            .upsert({ name, coins: Math.floor(bestScore) }, { onConflict: "name" });
+            .upsert({ name, coins: Math.floor(bestScore), owner_key: playerKey }, { onConflict: "name" });
 
         if (error) {
             leaderboardStatus.textContent = "Couldn't save your score.";

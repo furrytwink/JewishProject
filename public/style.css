@@ -409,6 +409,25 @@ footer {
 }
 .delete-row-btn:hover { background: #eab3ad; }
 
+.player-key-box {
+    background: var(--sky);
+    border: 1px dashed var(--blue);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+#playerKeyDisplay {
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    color: var(--blue-deep);
+    word-break: break-all;
+}
+.player-key-hint {
+    color: #5a6480;
+    margin: 4px 0 8px;
+}
+
 .leaderboard {
     margin-top: 34px;
     background: white;
