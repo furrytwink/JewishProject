@@ -409,6 +409,71 @@ footer {
 }
 .delete-row-btn:hover { background: #eab3ad; }
 
+#ownerDashboardBtn {
+    position: fixed;
+    left: 22px;
+    bottom: 22px;
+    padding: 12px 22px;
+    background: var(--blue-deep);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-family: "Assistant", sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,42,138,0.4);
+    z-index: 40;
+}
+#ownerDashboardBtn:hover { background: var(--blue); }
+
+.reset-btn {
+    display: block;
+    margin: 0 auto 16px;
+    padding: 9px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #b3261e;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+}
+.reset-btn:hover { background: #8f1e18; }
+
+.dashboard-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.coin-add-input {
+    width: 70px;
+    padding: 5px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+}
+.add-coins-btn, .zero-coins-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.add-coins-btn { background: #d7ecd9; color: #1f5a2a; }
+.add-coins-btn:hover { background: #bfe1c2; }
+.zero-coins-btn { background: #f4e3c1; color: #7a5a10; }
+.zero-coins-btn:hover { background: #ecd39c; }
+.role-select {
+    padding: 4px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    font-family: "Assistant", sans-serif;
+    font-size: 12px;
+}
+
 .player-key-box {
     background: var(--sky);
     border: 1px dashed var(--blue);
