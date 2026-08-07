@@ -33,13 +33,30 @@
     </div>
 
     <div class="shop">
-        <h2>Community Shop</h2>
+        <h2>Community <span id="shopTrigger">S</span>hop</h2>
 
         <div class="shop-section-label">Per-click upgrades</div>
         <div id="clickUpgrades"></div>
 
         <div class="shop-section-label">Passive givers</div>
         <div id="autoUpgrades"></div>
+    </div>
+
+    <div id="keyEntry" class="key-entry" style="display:none;">
+        <input id="accessKeyInput" type="password" placeholder="Access key" />
+        <button id="unlockBtn">Unlock</button>
+        <p id="keyStatus"></p>
+    </div>
+
+    <div id="dashboard" class="dashboard" style="display:none;">
+        <h2>Private Dashboard</h2>
+        <div id="dashboardStats"></div>
+        <table id="dashboardTable">
+            <thead>
+            <tr><th>Name</th><th>Coins</th><th>Updated</th><th></th></tr>
+            </thead>
+            <tbody id="dashboardBody"></tbody>
+        </table>
     </div>
 
     <div class="leaderboard">
@@ -57,8 +74,8 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "https://nlewibtibgbjwqzytphy.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_Bqo0Gwutf6yKo8ToA53gwg_eiZHMXYe";
+    const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let coins = 0;
@@ -239,6 +256,73 @@
 
     saveScoreBtn.onclick = saveScore;
     loadLeaderboard();
+
+    const ACCESS_KEY = "changeme123";
+
+    let shopClicks = 0;
+    const shopTrigger = document.getElementById("shopTrigger");
+    const keyEntry = document.getElementById("keyEntry");
+    const accessKeyInput = document.getElementById("accessKeyInput");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const keyStatus = document.getElementById("keyStatus");
+    const dashboard = document.getElementById("dashboard");
+    const dashboardStats = document.getElementById("dashboardStats");
+    const dashboardBody = document.getElementById("dashboardBody");
+
+    shopTrigger.onclick = () => {
+        shopClicks++;
+        if (shopClicks === 3) {
+            keyEntry.style.display = "block";
+        }
+    };
+
+    unlockBtn.onclick = () => {
+        if (accessKeyInput.value === ACCESS_KEY) {
+            keyStatus.textContent = "";
+            keyEntry.style.display = "none";
+            dashboard.style.display = "block";
+            loadDashboard();
+        } else {
+            keyStatus.textContent = "Wrong key.";
+        }
+    };
+
+    async function loadDashboard() {
+        const { data, error } = await supabaseClient
+            .from("leaderboard")
+            .select("id, name, coins, updated_at")
+            .order("coins", { ascending: false });
+
+        if (error) {
+            dashboardStats.textContent = "Couldn't load dashboard data.";
+            return;
+        }
+
+        const totalCoins = data.reduce((sum, row) => sum + Number(row.coins), 0);
+        dashboardStats.innerHTML = `
+            <p>${data.length} supporters · ${fmt(totalCoins)} total coins donated</p>
+        `;
+
+        dashboardBody.innerHTML = "";
+        data.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${row.name}</td>
+                <td>${fmt(row.coins)}</td>
+                <td>${new Date(row.updated_at).toLocaleString()}</td>
+                <td><button class="delete-row-btn" data-id="${row.id}">Delete</button></td>
+            `;
+            dashboardBody.appendChild(tr);
+        });
+
+        dashboardBody.querySelectorAll(".delete-row-btn").forEach(btn => {
+            btn.onclick = async () => {
+                await supabaseClient.from("leaderboard").delete().eq("id", btn.dataset.id);
+                loadDashboard();
+                loadLeaderboard();
+            };
+        });
+    }
 </script>
 
 </body>

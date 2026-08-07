@@ -328,6 +328,87 @@ footer {
     color: #8891ab;
     margin-top: 2px;
 }
+#shopTrigger {
+    cursor: default;
+    user-select: none;
+}
+
+.key-entry {
+    margin-top: 24px;
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.key-entry input {
+    flex: 1;
+    min-width: 140px;
+    padding: 9px 12px;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    font-family: "Assistant", sans-serif;
+}
+.key-entry button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 700;
+    cursor: pointer;
+}
+.key-entry #keyStatus {
+    width: 100%;
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #b3261e;
+}
+
+.dashboard {
+    margin-top: 24px;
+    background: white;
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 18px 20px 22px;
+    text-align: left;
+}
+.dashboard h2 {
+    text-align: center;
+    color: var(--blue-deep);
+    font-size: 20px;
+}
+#dashboardStats {
+    text-align: center;
+    color: #5a6480;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+#dashboardTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 13px;
+}
+#dashboardTable th, #dashboardTable td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+}
+.delete-row-btn {
+    border: none;
+    background: #f4d4d1;
+    color: #8a2c22;
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.delete-row-btn:hover { background: #eab3ad; }
+
 .leaderboard {
     margin-top: 34px;
     background: white;
